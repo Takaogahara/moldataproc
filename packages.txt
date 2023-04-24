@@ -1,4 +1,0 @@
-default-jre
-python3-rdkit
-librdkit1
-rdkit-data
