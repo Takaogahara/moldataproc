@@ -100,13 +100,11 @@ class DataCleaner:
 
         assert len(smiles_all) == len(smiles_stdz)
 
-        df = pd.DataFrame(smiles_stdz, columns=[self.col_smiles])
-        dataframe = dataframe.drop(columns=[self.col_smiles])
-        dataframe = pd.concat([dataframe, df], axis=1)
+        df = dataframe.drop(columns=[self.col_smiles])
+        df.insert(len(cols_order)-1, self.col_smiles, smiles_stdz)
+        df = df[cols_order]
 
-        dataframe = dataframe[cols_order]
-
-        return dataframe
+        return df
 
     def remove_duplicates(self, dataframe, task):
         """_summary_
@@ -196,7 +194,7 @@ class BioCleaner:
         df = dclean.remove_nan(df)
         df = dclean.filter_atoms(df)
         df = self.convert_units(df, threshold)
-        df = self.remove_outlier(df)
+        # df = self.remove_outlier(df)
         df = dclean.standardize_smiles(df)
         df = self.remove_bioduplicates(df)
 
@@ -249,15 +247,18 @@ class BioCleaner:
         # Create activity column
         converted_units = ["nM"] * len(list_values)
         converted_activity = ["Inactive"] * len(list_values)
+        converted_activity_bin = [0] * len(list_values)
 
         for idx, value in enumerate(converted_values):
             if value < threshold:
                 converted_activity[idx] = "Active"
+                converted_activity_bin[idx] = 1
 
         last_col = len(dataframe.columns)
         dataframe.insert(last_col, "Converted Value", converted_values)
         dataframe.insert(last_col+1, "Converted Units", converted_units)
         dataframe.insert(last_col+2, "Activity", converted_activity)
+        dataframe.insert(last_col+3, "Bin Activity", converted_activity_bin)
 
         return dataframe
 
