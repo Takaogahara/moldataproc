@@ -18,8 +18,8 @@ class Misc:
         if uploaded_file.type == "text/csv":
             file = pd.read_csv(uploaded_file, delimiter=None)
 
-        elif uploaded_file.type == "text/sdf":
-            file = LoadSDF(uploaded_file, smilesName="SMILES", molColName=None)
+        elif uploaded_file.type == "application/octet-stream":
+            file = LoadSDF(uploaded_file, smilesName="Smiles", molColName=None)
 
         return file
 
