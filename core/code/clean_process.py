@@ -67,8 +67,12 @@ class DataCleaner:
 
                 molecule.append(valid_atom)
 
-            if all(valid is True for valid in molecule):
-                valid_molecule.append(True)
+            if len(molecule) >= 2:
+                if all(valid is True for valid in molecule):
+                    valid_molecule.append(True)
+                else:
+                    valid_molecule.append(False)
+
             else:
                 valid_molecule.append(False)
 
