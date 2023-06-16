@@ -228,19 +228,21 @@ class BioCleaner:
         Returns:
             _type_: _description_
         """
-        standard_value = self.col_conv[0]
-        standard_units = self.col_conv[1]
-        mol_weight = self.col_conv[2]
+        mol_weight = self.col_conv[0]
+        standard_relation = self.col_conv[1]
+        standard_value = self.col_conv[2]
+        standard_units = self.col_conv[3]
 
         dataframe = dataframe[dataframe[standard_units].isin(VALID_UNITS)]
+        list_weight = list(dataframe[mol_weight])
+        list_relations = list(dataframe[standard_relation])
         list_values = list(dataframe[standard_value])
         list_units = list(dataframe[standard_units])
-        list_weight = list(dataframe[mol_weight])
 
         converted_values = []
         for idx, unit in enumerate(list_units):
             if unit == "ug.mL-1":
-                val = (list_values[idx] / list_weight[idx]) * 1000
+                val = (list_values[idx] / float(list_weight[idx])) * 1000
             elif unit == "uM":
                 val = list_values[idx] * 1000
             elif unit == "nM":
@@ -248,21 +250,30 @@ class BioCleaner:
 
             converted_values.append(val)
 
-        # Create activity column
+        # Create activity lists
         converted_units = ["nM"] * len(list_values)
         converted_activity = ["Inactive"] * len(list_values)
         converted_activity_bin = [0] * len(list_values)
 
+        # Check activity
         for idx, value in enumerate(converted_values):
-            if value < threshold:
+            # Bellow threshold
+            if (">" not in list_relations[idx]) and (value < threshold):
                 converted_activity[idx] = "Active"
                 converted_activity_bin[idx] = 1
 
+        # Create activity column
         last_col = len(dataframe.columns)
         dataframe.insert(last_col, "Converted Value", converted_values)
         dataframe.insert(last_col+1, "Converted Units", converted_units)
         dataframe.insert(last_col+2, "Activity", converted_activity)
         dataframe.insert(last_col+3, "Bin Activity", converted_activity_bin)
+
+        # Remove inconclusive ">" relations
+        dataframe = dataframe[~((dataframe[standard_relation] == "'>'") &
+                                (dataframe["Converted Value"] < threshold))]
+        dataframe = dataframe[~((dataframe[standard_relation] == "'>='") &
+                                (dataframe["Converted Value"] < threshold))]
 
         return dataframe
 
@@ -329,6 +340,7 @@ def _remove_bio(selection, col_smiles, col_value):
         # Check biological activity
         if len(selection["Activity"].unique()) == 1:
             dataframe = selection[df_sub == df_sub.max()]
+            dataframe = dataframe.iloc[:1]
 
         else:
             dataframe = pd.DataFrame()

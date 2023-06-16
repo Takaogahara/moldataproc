@@ -26,13 +26,14 @@ def bio_cleaner():
 
         # UI
         col_smls = Sidebar.column_selector(data, "Select :red[Smiles] column")
-        conv_text = ("Select :red[Standard Value], :red[Standard Units],"
-                     " :red[Molecular Weight] (IN THIS ORDER)")
+        conv_text = ("Select :red[Molecular Weight], :red[Standard Relation],"
+                     " :red[Standard Value], :red[Standard Units]"
+                     " (IN THIS ORDER)")
         col_conv = Sidebar.multicolumn_selector(data, conv_text)
         col_strn = Sidebar.column_selector(data, "Select :red[Strain] column")
         strains = Sidebar.strain_selector(data, col_strn)
         thrd = st.sidebar.number_input("**Activity threshold value (nM)**",
-                                       value=10.0)
+                                       value=10000.0)
 
         # Set displays placeholders
         info_up = st.empty()
