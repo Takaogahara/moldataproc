@@ -57,25 +57,28 @@ class DataCleaner:
         for smiles in smiles_all.values:
             mol = Chem.MolFromSmiles(str(smiles))
 
-            molecule = []
-            for atom in mol.GetAtoms():
-                atom_str = atom.GetSymbol()
-                valid_atom = False
+            if mol is not None:
+                molecule = []
+                for atom in mol.GetAtoms():
+                    atom_str = atom.GetSymbol()
+                    valid_atom = False
 
-                if atom_str in VALID_ATOMS:
-                    valid_atom = True
+                    if atom_str in VALID_ATOMS:
+                        valid_atom = True
 
-                molecule.append(valid_atom)
+                    molecule.append(valid_atom)
 
-            if len(molecule) >= 2:
-                if all(valid is True for valid in molecule):
-                    valid_molecule.append(True)
+                if len(molecule) >= 2:
+                    if all(valid is True for valid in molecule):
+                        valid_molecule.append(True)
+                    else:
+                        valid_molecule.append(False)
+
                 else:
                     valid_molecule.append(False)
 
             else:
                 valid_molecule.append(False)
-
         dataframe = dataframe[valid_molecule]
         return dataframe
 
